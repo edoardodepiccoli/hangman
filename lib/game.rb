@@ -6,34 +6,32 @@ require 'time'
 class Game
   include FileUtilities
 
-  def initialize(words_file_path)
+  def initialize(words_file_path, should_load_saved_game)
     @valid_words = load_valid_words(words_file_path)
-    @secret_word = @valid_words.sample
-    @guesses_left = 7
 
-    @guessed_letters = []
-    @wrong_guesses = []
+    if should_load_saved_game
+      saved_string = File.read("lib/saves/saved_game.json")
+      saved_data = JSON.parse(saved_string)
+
+      @secret_word = saved_data["secret_word"]
+      @guesses_left = saved_data["guesses_left"]
+
+      @guessed_letters = saved_data["guessed_letters"]
+      @wrong_guesses = saved_data["wrong_guesses"]
+    else
+      @secret_word = @valid_words.sample
+      @guesses_left = 7
+
+      @guessed_letters = []
+      @wrong_guesses = []
+    end
+
     @finished = false
+
     play_round
   end
 
   private
-
-  def save_game
-    json_save = JSON.dump({
-      "@valid_words" => @valid_words,
-      "@secret_word" => @secret_word,
-      "@guesses_left" => @guesses_left,
-      "@guessed_letters" => @guessed_letters,
-      "@wrong_guesses" => @wrong_guesses,
-      "@finished" => @finished
-    })
-    timestamp = Time.now.to_i
-    file = File.new("lib/saves/#{timestamp}.json", "w")
-    file.truncate(0)
-    file.puts(json_save)
-    file.close
-  end
 
   def play_round
     unless @finished
@@ -48,13 +46,33 @@ class Game
     end
   end
 
+  def save_game
+    json_save = JSON.dump({
+      "secret_word" => @secret_word,
+      "guesses_left" => @guesses_left,
+      "guessed_letters" => @guessed_letters,
+      "wrong_guesses" => @wrong_guesses,
+      "finished" => @finished
+    })
+    file = File.new("lib/saves/saved_game.json", "w")
+    file.truncate(0)
+    file.puts(json_save)
+    file.close
+  end
+
+  def delete_saved_game
+    File.delete('lib/saves/saved_game.json') if File.exist?('lib/saves/saved_game.json')
+  end
+
   def check_for_win
     if @guessed_letters.include?(@secret_word) || @secret_word.split('').all? { |letter| @guessed_letters.include?(letter) }
       @finished = true
       puts('you won!'.colorize(:green))
+      delete_saved_game
     elsif @guesses_left == 0
       @finished = true
       puts('you lost :('.colorize(:red))
+      delete_saved_game
     end
   end
 
@@ -85,6 +103,8 @@ class Game
 
   def reset_screen
     system('clear')
+    puts('type "exit_game" any time to save the game and exit it')
+    puts
     puts("guesses left => #{@guesses_left}")
     puts("wrong guessed words and letters => #{@wrong_guesses}")
     puts
