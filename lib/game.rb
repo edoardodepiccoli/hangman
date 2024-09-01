@@ -1,6 +1,7 @@
 require_relative 'file_utilities'
 require 'colorize'
-require "json"
+require 'json'
+require 'time'
 
 class Game
   include FileUtilities
@@ -27,8 +28,11 @@ class Game
       "@wrong_guesses" => @wrong_guesses,
       "@finished" => @finished
     })
-    timestamp = Time.now
-    File.new("saves/#{timestamp}.json")
+    timestamp = Time.now.to_i
+    file = File.new("lib/saves/#{timestamp}.json", "w")
+    file.truncate(0)
+    file.puts(json_save)
+    file.close
   end
 
   def play_round
@@ -57,6 +61,9 @@ class Game
   def handle_user_guess(user_guess)
     if user_guess == 'exit_game'
       # serialize then finish game
+      save_game
+      puts('exiting game...')
+      @finished = true
     end
 
     if @secret_word.split('').include?(user_guess) || @secret_word == user_guess
