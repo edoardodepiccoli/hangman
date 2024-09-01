@@ -3,6 +3,7 @@ require_relative 'lib/game'
 should_load_saved_game = false
 
 if File.exist?('lib/saves/saved_game.json')
+  system("clear")
   puts("welcome to hangman!")
   puts("do you want to load the last saved game or play a new one (a/b)")
 
