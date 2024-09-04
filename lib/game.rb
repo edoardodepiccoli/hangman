@@ -7,17 +7,9 @@ class Game
   include FileUtilities
 
   def initialize(words_file_path, should_load_saved_game)
-    @debugging = true
+    @debugging = false
 
     @valid_words = load_valid_words(words_file_path) # use only if computer choses the word
-
-    puts("insert word to guess")
-    user_chosen_word = gets.chomp.downcase
-
-    while user_chosen_word == '' || user_chosen_word.length < 5 || user_chosen_word.length > 12
-      puts("please try again, words should be between 5 and 12 characters")
-      user_chosen_word = gets.chomp.downcase
-    end
 
     if should_load_saved_game
       saved_string = File.read("lib/saves/saved_game.json")
@@ -29,8 +21,16 @@ class Game
       @guessed_letters = saved_data["guessed_letters"]
       @wrong_guesses = saved_data["wrong_guesses"]
     else
+      puts("insert word to guess")
+      user_chosen_word = gets.chomp.downcase
+
+      while user_chosen_word == '' || user_chosen_word.length < 5 || user_chosen_word.length > 12
+        puts("please try again, words should be between 5 and 12 characters")
+        user_chosen_word = gets.chomp.downcase
+      end
+
       @secret_word = user_chosen_word # let another user chose the word
-      @guesses_left = 10
+      @guesses_left = 7
 
       @guessed_letters = []
       @wrong_guesses = []
@@ -49,7 +49,6 @@ class Game
       user_guess = get_user_guess
       handle_user_guess(user_guess)
 
-      decrease_guesses_left
       check_for_win
 
       play_round
@@ -99,6 +98,7 @@ class Game
       @guessed_letters.push(user_guess) unless @guessed_letters.include?(user_guess)
     else
       @wrong_guesses.push(user_guess)
+      decrease_guesses_left
     end
   end
 
