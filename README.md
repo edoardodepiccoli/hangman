@@ -1,8 +1,13 @@
-# hangman
+# Hangman
 
-## description
-simple cli hangman game. every time the reset display method is called the secret word is displayed, that is for a testing purpose
+## Description
+A simple CLI-based Hangman game. The game currently displays the secret word when the `reset_display` method is called (for testing purposes).
 
-## features to add
-- option to load multiple saved games
-- option to exit the game without saving and managing saved games
+## Known Issues
+- The game crashes if the save file is not found.
+
+## Planned Features
+- Support for loading multiple saved games.
+- Option to exit the game without saving.
+- Improved management of saved games.
+
